@@ -14,11 +14,11 @@ fn forum() -> Json<Forum>{
 
 #[launch]
 fn rocket() -> _ {	
-    rocket::build().mount("/nigos", routes![forum])
+    rocket::build().mount("/nigos", routes![forum, upload_forum])
 }
 
 
-#[post("/", data = "<input>")]
+#[post("/posting", data = "<input>")]
 fn upload_forum(input: Json<Forum>){
 	let new_forum = read_forum(input);
 	write_forum(new_forum);
