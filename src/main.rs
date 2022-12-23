@@ -1,32 +1,31 @@
-#[macro_use] extern crate rocket;
-pub use rocket::response::status;
-pub use rocket::serde::{Serialize,Serializer, Deserialize, json::Json};
-pub use std::fs::File;
-pub use rocket::Data;
-use db::{Forum, write_forum, _forums, read_forum};
-pub mod db;
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 
-#[get("/forum")]
-fn forum() -> Json<Forum>{
-	let dbz = _forums().unwrap();
-	Json(dbz)
+#[get("/")]
+async fn hello() -> impl Responder {
+    HttpResponse::Ok().body("Hello world!")
 }
 
-#[launch]
-fn rocket() -> _ {	
-    rocket::build().mount("/nigos", routes![forum, upload_forum])
+#[post("/echo")]
+async fn echo(req_body: String) -> impl Responder {
+    HttpResponse::Ok().body(req_body)
 }
 
-
-#[post("/posting", data = "<input>")]
-fn upload_forum(input: Json<Forum>){
-	let new_forum = read_forum(input);
-	write_forum(new_forum);
+async fn manual_hello() -> impl Responder {
+    HttpResponse::Ok().body("Hey there!")
 }
 
-
-
-
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| {
+        App::new()
+            .service(hello)
+            .service(echo)
+            .route("/hey", web::get().to(manual_hello))
+    })
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
+}
 
 
 
